@@ -1,3 +1,7 @@
 .venv/
 text/
 text_ru_ba.txt
+__pycache__/
+text.ba-filtered.ba.subword
+text.ru-filtered.ru.subword
+load/
