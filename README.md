@@ -1,12 +1,12 @@
 # Russian - Bashkir bilingual neural translator
-
+Files from load folder are available here - https://drive.google.com/drive/folders/1yzh4ZnqG_q5UcNPvE4ALnHTmCElEFwqV?usp=sharing  
 ## Training process
 Trained for 90 epochs using 524k sentence pairs for 2 days total (batch size = 64, hidden size = 124, GPU: RTX 3060)  
 
 Vocab size ru: 83333  
 Vocab size ba: 72647  
 
-NNLog for Russian-Bashkir pair: -0.145
+NNLog for Russian-Bashkir pair: -0.145  
 NNLog for Bashkir-Russian pair: -0.195
 
 
