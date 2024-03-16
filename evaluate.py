@@ -146,7 +146,7 @@ def translate_sentence(input_sentence, language):
 
 
 # setting up Streamlit app
-st.title("Simple Translation App")
+st.title("Russian-Bashkir bilingual translation app")
 
 language = st.radio("Select language pair:", ("Russian-Bashkir", "Bashkir-Russian"))
 
