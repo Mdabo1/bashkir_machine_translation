@@ -2,6 +2,7 @@ import torch
 import pickle  # to load all our vocabularies and language decoder/encoder
 import sentencepiece as spm
 import re
+import streamlit as st
 
 EOS_token = 1
 
@@ -106,33 +107,55 @@ ba_encoder.eval()
 ba_decoder.eval()
 
 
-# inference
-while True:
-    language = input('Введите с какого языка хотите перевод ("ru"/"ba):')
-    input_sentence = input("Введите предложение:")
+def translate_sentence(input_sentence, language):
     if language == "ru":
-        encoder, decoder = ru_encoder, ru_decoder
-        input_lang, output_lang = ru_input_lang, ru_output_lang
-        token_encoder, token_decoder = sp_ru, sp_ba
-    else:
-        encoder, decoder = ba_encoder, ba_decoder
-        input_lang, output_lang = ba_input_lang, ba_output_lang
-        token_encoder, token_decoder = sp_ba, sp_ru
+        input_sentence = input_sentence.strip()
+        input_sentence = sp_ru.encode_as_pieces(input_sentence)
+        input_sentence = " ".join([token for token in input_sentence])
+        translated = ""
+        output_words, _ = evaluate(
+            ru_encoder, ru_decoder, input_sentence, ru_input_lang, ru_output_lang
+        )
+        for line in output_words:
+            line = sp_ba.decode_pieces(line)
+            if line in [",", ".", "!"]:
+                translated = translated[:-1]
+            translated += line
+            translated += " "
+        translated = translated[:-6]
+        translated = merge_digits(translated)
+        return translated
 
-    input_sentence = input_sentence.strip()
-    input_sentence = token_encoder.encode_as_pieces(input_sentence)
-    input_sentence = " ".join([token for token in input_sentence])
-    print(input_sentence)
-    translated = ""
-    output_words, _ = evaluate(
-        encoder, decoder, input_sentence, input_lang, output_lang
-    )
-    for line in output_words:
-        line = token_decoder.decode_pieces(line)
-        if line in [",", ".", "!"]:
-            translated = translated[:-1]
-        translated += line
-        translated += " "
-    translated = translated[:-6]
-    translated = merge_digits(translated)
-    print(translated)
+    if language == "ba":
+        input_sentence = input_sentence.strip()
+        input_sentence = sp_ba.encode_as_pieces(input_sentence)
+        input_sentence = " ".join([token for token in input_sentence])
+        translated = ""
+        output_words, _ = evaluate(
+            ba_encoder, ba_decoder, input_sentence, ba_input_lang, ba_output_lang
+        )
+        for line in output_words:
+            line = sp_ru.decode_pieces(line)
+            if line in [",", ".", "!"]:
+                translated = translated[:-1]
+            translated += line
+            translated += " "
+        translated = translated[:-6]
+        translated = merge_digits(translated)
+        return translated
+
+
+# setting up Streamlit app
+st.title("Simple Translation App")
+
+language = st.radio("Select language pair:", ("Russian-Bashkir", "Bashkir-Russian"))
+
+input_sentence = st.text_input("Enter a sentence to translate:")
+if st.button("Translate"):
+    if input_sentence:
+        if language == "Russian-Bashkir":
+            translated_sentence = translate_sentence(input_sentence, "ru")
+        else:
+            translated_sentence = translate_sentence(input_sentence, "ba")
+
+        st.write("Translated sentence:", translated_sentence)
